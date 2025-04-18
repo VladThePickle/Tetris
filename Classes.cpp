@@ -202,7 +202,6 @@ bool board::isActivePieceCell(int row, int col) {
 }
 
 void board::printecran() {
-    // Draw the top border
     mvprintw(2, 0, " __________");
 
     for (int i = 3; i < inaltime; i++) {
@@ -210,7 +209,7 @@ void board::printecran() {
         for (int j = 0; j < latime; j++) {
             int screenX = j + 1;
             char cell = ecran[i][j];
-            if (cell == '#') {
+            if (cell == cellval) {
                 int colorPair = (isActivePieceCell(i, j) && piesaactiva != nullptr)
                     ? piesaactiva->getcolor()
                     : ecran_color[i][j];
@@ -328,7 +327,7 @@ void board::newpiece() {
 void board::setCell(int row, int col, char c, int color) {
     if (row >= 0 && row < inaltime && col >= 0 && col < latime) {
         ecran[row][col] = c;
-        if (c == '#')
+        if (c == cellval)
             ecran_color[row][col] = color;
         else
             ecran_color[row][col] = 0;
@@ -383,7 +382,7 @@ void board::update() {
     for (int i = 0; i < 4; i++) {
         int row = piesaactiva->gety() + piesaactiva->getoffsets(i, 0);
         int col = piesaactiva->getx() + piesaactiva->getoffsets(i, 1);
-        setCell(row, col, '#', piesaactiva->getcolor());
+        setCell(row, col, cellval, piesaactiva->getcolor());
     }
 }
 
@@ -392,7 +391,7 @@ void board::checkclear() {
         bool full = true;
 
         for (int j = 0; j < latime; j++) {
-            if (ecran[i][j] != '#') {
+            if (ecran[i][j] != cellval) {
                 full = false;
                 break;
             }
@@ -421,7 +420,7 @@ void board::checkclear() {
 
 bool board::checkloss() {
     for (int i = 0; i < latime; i++) {
-        if (ecran[3][i] == '#')
+        if (ecran[3][i] == cellval)
             return true;
     }
     return false;
@@ -477,7 +476,7 @@ void gamemanager::mainloop() {
         if (now - lastUpdate >= ((tickspeed * ag) / fallDelayMultiplier) * targetFrameDelay) {
             if (laberson->getpiesaactiva()->falldown() == 2) {
                 count++;
-                if (count > 1) {
+                if (count > coyoteticks) {
                     for (int i = 0; i < 4; i++)
                          {
                              mvprintw(inaltime / 2 + laberson->geturmatoareapiesa()->getoffsets(i, 0), latime + 10 + laberson->geturmatoareapiesa()->getoffsets(i, 1), " ");
@@ -519,7 +518,7 @@ int gamemanager::getscore() {
 }
 
 void gamemanager::checkscore() {
-    if (score % 500 == 0) {
+    if (score % nextscore == 0) {
         level++;
         double delay_frames = std::max(2.0, std::floor(20 - (2 * level)));
         double desired_delay_ms = delay_frames * framerate;
@@ -544,7 +543,8 @@ void gamemanager::startscreen() {
         "   |   |      |         |       |   |      |  | \\  \\   |        |  \\  \\___/ / ",
         "   |___|      |_________|       |___|      |__|  \\__\\  |________|   \\______/  ",
         "",
-        "                         Press up_arrow to start..."
+        "",
+        "                         Press up_arrow to start...",
     };
 
     int numLines = sizeof(startScreen) / sizeof(startScreen[0]);
@@ -554,6 +554,7 @@ void gamemanager::startscreen() {
         int start_col = 20;
         mvprintw(start_row + i, start_col, "%s", startScreen[i]);
     }
+    mvprintw(23, 23, "controls: left/right arrow to move sideways \n                              up arrow to rotate \n                              down arrow to fall faster\n");
 
     refresh();
     int count = 0;
@@ -575,7 +576,7 @@ void gamemanager::startscreen() {
         refresh();
     }
 
-    for (int i = 0; i < numLines; i++) {
+    for (int i = 0; i < numLines+6; i++) {
         int start_col = 20;
         mvprintw(start_row + i, start_col, "                                                                                     ");
     }

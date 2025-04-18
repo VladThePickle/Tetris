@@ -5,7 +5,9 @@ const int framerate = 42;
 const int inaltime = 23;
 const int latime = 10;
 const double tickspeed = 7;
+const int nextscore = 500;
 const char cellval = '#';
+const int coyoteticks = 1;
 
 // FORME
 // I
