@@ -9,9 +9,9 @@ class gamemanager;
 class piece {
 private:
     int x{ 3 };
-    std::vector<std::vector<char>> mat;
     int y{ 3 };
     int rotation{ 0 };
+    int color{ 1 };
     char piecetype{ 'I' };
     int offsets[4][2];
     board* boardContext{ nullptr };  
@@ -22,6 +22,7 @@ public:
 
     // Setters
     void setx(int x);
+    void setcolor(int a) { color = a; }
     void sety(int y);
     void setrotation(int rotation);
     void setpiecetype(char piecetype);
@@ -35,10 +36,12 @@ public:
     int getx();
     int gety();
     int getrotation();
+    int getcolor() const { return color; }
     char getpiecetype();
 
     // ACTUAL functions
     void rotate();
+
     int falldown();
     void moveleft();
     void moveright();
@@ -47,6 +50,8 @@ public:
 class board {
 private:
     char ecran[inaltime][latime];
+    int ecran_color[inaltime][latime];
+
     piece* piesaactiva;
     piece* urmatoareapiesa{ nullptr };
     gamemanager* managerContext{ nullptr };
@@ -61,11 +66,13 @@ public:
     void setManager(gamemanager* b) { managerContext = b; };
     piece* getpiesaactiva();
     void update();
+    void setCell(int row, int col, char c, int color);
     void newpiece();
-    bool validmove(int y, int x);
+    int validmove(int y, int x);
     void clearpiece();
     piece* geturmatoareapiesa();
     bool checkloss();
+    bool isActivePieceCell(int row, int col);
     void checkclear();
     void printurmatoare();
     void deletepiesaactiva();
@@ -93,5 +100,6 @@ public:
     void startscreen();
     void losescreen();
     void deleteboard();
+    
     ~gamemanager();
 };

@@ -5,6 +5,7 @@ const int framerate = 42;
 const int inaltime = 23;
 const int latime = 10;
 const double tickspeed = 7;
+const char cellval = '#';
 
 // FORME
 // I

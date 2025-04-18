@@ -1,4 +1,4 @@
-#define NOMINMAX         
+﻿#define NOMINMAX         
 #include <iostream>
 #include "randomness.h"
 #include "Classes.h"
@@ -73,9 +73,37 @@ void piece::rotate() {
 
     bool valid = true;
     for (int i = 0; i < 4; i++) {
-        if (!boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1])) {
+        if (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 1 || boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 4) {
             valid = false;
             break;
+        }
+        else if (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 2)
+        {
+            //int tempx = x;
+            while (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 2)
+            {
+                if (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) != 1 && boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) != 4) {
+                    x = x - 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        else if (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 3)
+        {
+            //int tempx = x;
+            while (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) == 3)
+            {
+                if (boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) != 1 && boardContext->validmove(y + newOffsets[i][0], x + newOffsets[i][1]) != 4) {
+                    x = x + 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
     }
 
@@ -95,7 +123,7 @@ int piece::falldown() {
 
     bool valid = true;
     for (int i = 0; i < 4; i++) {
-        if (!boardContext->validmove(y + offsets[i][0] + 1, x + offsets[i][1])) {
+        if (boardContext->validmove(y + offsets[i][0] + 1, x + offsets[i][1]) != 0) {
             valid = false;
             break;
         }
@@ -116,7 +144,7 @@ void piece::moveleft() {
 
     bool valid = true;
     for (int i = 0; i < 4; i++) {
-        if (!boardContext->validmove(y + offsets[i][0], (x - 1) + offsets[i][1])) {
+        if (boardContext->validmove(y + offsets[i][0], (x - 1) + offsets[i][1]) != 0) {
             valid = false;
             break;
         }
@@ -136,7 +164,7 @@ void piece::moveright() {
 
     bool valid = true;
     for (int i = 0; i < 4; i++) {
-        if (!boardContext->validmove(y + offsets[i][0], (x + 1) + offsets[i][1])) {
+        if (boardContext->validmove(y + offsets[i][0], (x + 1) + offsets[i][1]) != 0) {
             valid = false;
             break;
         }
@@ -161,15 +189,44 @@ board::board() {
     urmatoareapiesa = nullptr;
 }
 
+bool board::isActivePieceCell(int row, int col) {
+    if (piesaactiva == nullptr)
+        return false;
+    for (int i = 0; i < 4; i++) {
+        int cellRow = piesaactiva->gety() + piesaactiva->getoffsets(i, 0);
+        int cellCol = piesaactiva->getx() + piesaactiva->getoffsets(i, 1);
+        if (cellRow == row && cellCol == col)
+            return true;
+    }
+    return false;
+}
+
 void board::printecran() {
+    // Draw the top border
     mvprintw(2, 0, " __________");
+
     for (int i = 3; i < inaltime; i++) {
         mvprintw(i, 0, "|");
         for (int j = 0; j < latime; j++) {
-            mvprintw(i, j + 1, "%c", ecran[i][j]);
+            int screenX = j + 1;
+            char cell = ecran[i][j];
+            if (cell == '#') {
+                int colorPair = (isActivePieceCell(i, j) && piesaactiva != nullptr)
+                    ? piesaactiva->getcolor()
+                    : ecran_color[i][j];
+                if (colorPair <= 0)
+                    colorPair = 8; 
+                attron(COLOR_PAIR(colorPair));
+                mvprintw(i, screenX, "%c", cellval);
+                attroff(COLOR_PAIR(colorPair));
+            }
+            else {
+                mvprintw(i, screenX, " ");
+            }
         }
         mvprintw(i, latime + 1, "|");
     }
+
     mvprintw(inaltime, 0, " ----------");
 
     mvprintw(0, 0, "LEVEL:");
@@ -180,30 +237,30 @@ void board::printecran() {
     refresh();
 }
 
-void board::printurmatoare()
-{
+void board::printurmatoare() {
     if (urmatoareapiesa != nullptr) {
+        mvprintw(inaltime / 2 - 3, latime + 8, "NEXT:");
+        mvprintw(inaltime / 2 - 2, latime + 8, "_______");
+        mvprintw(inaltime / 2 - 1, latime + 7, "|");
+        mvprintw(inaltime / 2 - 1, latime + 15, "|");
+        mvprintw(inaltime / 2, latime + 7, "|");
+        mvprintw(inaltime / 2, latime + 15, "|");
+        mvprintw(inaltime / 2 + 1, latime + 7, "|");
+        mvprintw(inaltime / 2 + 1, latime + 15, "|");
+        mvprintw(inaltime / 2 + 2, latime + 7, "|");
+        mvprintw(inaltime / 2 + 2, latime + 15, "|");
+        mvprintw(inaltime / 2 + 3, latime + 7, "|");
+        mvprintw(inaltime / 2 + 3, latime + 15, "|");
+        mvprintw(inaltime / 2 + 4, latime + 7, "|");
+        mvprintw(inaltime / 2 + 4, latime + 15, "|");
+        mvprintw(inaltime / 2 + 4, latime + 8, "_______");
+
         for (int i = 0; i < 4; i++) {
-
-            mvprintw(inaltime / 2 - 3, latime + 8, "NEXT:");
-            mvprintw(inaltime / 2 - 2   , latime + 8, "_______");
-            mvprintw(inaltime / 2 - 1, latime + 7, "|");
-            mvprintw(inaltime / 2 - 1, latime + 15, "|");
-            mvprintw(inaltime / 2, latime + 7, "|");
-            mvprintw(inaltime / 2, latime + 15, "|");
-            mvprintw(inaltime / 2 + 1, latime + 7, "|");
-            mvprintw(inaltime / 2 + 1, latime + 15, "|");
-            mvprintw(inaltime / 2 +2 , latime + 7, "|");
-            mvprintw(inaltime / 2 + 2, latime + 15, "|");
-            mvprintw(inaltime / 2 + 3, latime + 7, "|");
-            mvprintw(inaltime / 2 + 3, latime + 15, "|");
-            mvprintw(inaltime / 2 + 4, latime + 7, "|");
-            mvprintw(inaltime / 2 + 4, latime + 15, "|");
-            mvprintw(inaltime / 2 + 4, latime + 8, "_______");
-
             int previewY = inaltime / 2 + urmatoareapiesa->getoffsets(i, 0);
             int previewX = latime + 10 + urmatoareapiesa->getoffsets(i, 1);
-            mvprintw(previewY, previewX, "#");
+            attron(COLOR_PAIR(urmatoareapiesa->getcolor()));
+            mvprintw(previewY, previewX, "%c", cellval);
+            attroff(COLOR_PAIR(urmatoareapiesa->getcolor()));
         }
     }
 }
@@ -234,13 +291,13 @@ void board::newpiece() {
         piesaactiva->setBoard(this);
         char type = getNextPiece();
         switch (type) {
-        case 'I': piesaactiva->setoffsets(offsetI); break;
-        case 'O': piesaactiva->setoffsets(offsetO); break;
-        case 'T': piesaactiva->setoffsets(offsetT); break;
-        case 'S': piesaactiva->setoffsets(offsetS); break;
-        case 'Z': piesaactiva->setoffsets(offsetZ); break;
-        case 'L': piesaactiva->setoffsets(offsetL); break;
-        case 'J': piesaactiva->setoffsets(offsetJ); break;
+        case 'I': piesaactiva->setoffsets(offsetI); piesaactiva->setcolor(1); break;
+        case 'O': piesaactiva->setoffsets(offsetO); piesaactiva->setcolor(2); break;
+        case 'T': piesaactiva->setoffsets(offsetT); piesaactiva->setcolor(3); break;
+        case 'S': piesaactiva->setoffsets(offsetS); piesaactiva->setcolor(4); break;
+        case 'Z': piesaactiva->setoffsets(offsetZ); piesaactiva->setcolor(5); break;
+        case 'L': piesaactiva->setoffsets(offsetL); piesaactiva->setcolor(6); break;
+        case 'J': piesaactiva->setoffsets(offsetJ); piesaactiva->setcolor(7); break;
         default: break;
         }
     }
@@ -255,17 +312,27 @@ void board::newpiece() {
     urmatoareapiesa->setBoard(this);
     char type2 = getNextPiece();
     switch (type2) {
-    case 'I': urmatoareapiesa->setoffsets(offsetI); break;
-    case 'O': urmatoareapiesa->setoffsets(offsetO); break;
-    case 'T': urmatoareapiesa->setoffsets(offsetT); break;
-    case 'S': urmatoareapiesa->setoffsets(offsetS); break;
-    case 'Z': urmatoareapiesa->setoffsets(offsetZ); break;
-    case 'L': urmatoareapiesa->setoffsets(offsetL); break;
-    case 'J': urmatoareapiesa->setoffsets(offsetJ); break;
+    case 'I': urmatoareapiesa->setoffsets(offsetI);urmatoareapiesa->setcolor(1); break;
+    case 'O': urmatoareapiesa->setoffsets(offsetO);urmatoareapiesa->setcolor(2); break;
+    case 'T': urmatoareapiesa->setoffsets(offsetT);urmatoareapiesa->setcolor(3); break;
+    case 'S': urmatoareapiesa->setoffsets(offsetS);urmatoareapiesa->setcolor(4); break;
+    case 'Z': urmatoareapiesa->setoffsets(offsetZ);urmatoareapiesa->setcolor(5); break;
+    case 'L': urmatoareapiesa->setoffsets(offsetL);urmatoareapiesa->setcolor(6); break;
+    case 'J': urmatoareapiesa->setoffsets(offsetJ);urmatoareapiesa->setcolor(7); break;
     default: break;
     }
 
     update();
+}
+
+void board::setCell(int row, int col, char c, int color) {
+    if (row >= 0 && row < inaltime && col >= 0 && col < latime) {
+        ecran[row][col] = c;
+        if (c == '#')
+            ecran_color[row][col] = color;
+        else
+            ecran_color[row][col] = 0;
+    }
 }
 
 void board::clearpiece() {
@@ -297,14 +364,16 @@ board::~board() {
         delete urmatoareapiesa;
 }
 
-bool board::validmove(int y, int x) {
+int board::validmove(int y, int x) {
     if (y >= inaltime || y < 0)
-        return false;
-    if (x >= latime || x < 0)
-        return false;
+        return 1;
+    if (x >= latime)
+        return 2;
+    if (x < 0)
+        return 3;
     if (getecran(y, x) != ' ')
-        return false;
-    return true;
+        return 4;
+    return 0;
 }
 
 void board::update() {
@@ -312,8 +381,9 @@ void board::update() {
         return;
 
     for (int i = 0; i < 4; i++) {
-        setecran('#', piesaactiva->gety() + piesaactiva->getoffsets(i, 0),
-            piesaactiva->getx() + piesaactiva->getoffsets(i, 1));
+        int row = piesaactiva->gety() + piesaactiva->getoffsets(i, 0);
+        int col = piesaactiva->getx() + piesaactiva->getoffsets(i, 1);
+        setCell(row, col, '#', piesaactiva->getcolor());
     }
 }
 
